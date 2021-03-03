@@ -1,0 +1,36 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
+    "clean": "lerna run clean",
+    "ignore-sync": "ignore-sync .",
+    "format": "npm run format:eslint && npm run format:prettier",
+    "format:eslint": "eslint \"**/*.{js,ts}\" --fix",
+    "format:prettier": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",
+    "lint": "eslint \"**/*.{js,ts}\"",
+    "nuke": "rm -rf node_modules packages/{*,labs/*}/node_modules && npm install && npm run bootstrap && npm run clean"
+  },
+  "dependencies": {
+    "lerna": "^4.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
+    "eslint": "^7.21.0",
+    "husky": "^5.1.3",
+    "ignore-sync": "^3.1.0",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run ignore-sync && lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.{cjs,html,js,json,md,ts}": "prettier --write",
+    "**/*.{js,ts}": "eslint --fix"
+  }
+}
