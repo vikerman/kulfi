@@ -1,5 +1,3 @@
 import {ReactiveElement} from 'lit';
 
-export class SplitElement extends ReactiveElement {
-
-}
+export class SplitElement extends ReactiveElement {}

@@ -1,1 +1,6 @@
-dist
+node_modules/
+dist/
+
+*.tgz
+*.tsbuildinfo
+.DS_Store

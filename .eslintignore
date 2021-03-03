@@ -9,4 +9,9 @@ lerna-debug.log
 *.tsbuildinfo
 .DS_Store
 
-packages/kulfi/**/dist
+packages/kulfi/**/node_modules/
+packages/kulfi/**/dist/
+
+packages/kulfi/**/*.tgz
+packages/kulfi/**/*.tsbuildinfo
+packages/kulfi/**/.DS_Store
