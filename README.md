@@ -20,4 +20,3 @@ Aspirational ideas:
 - Use budgets for everything - JS, HTML, CSS
 - Integrate with performance tools in CI to catch regressions
 - Setup real world client metrics
-
