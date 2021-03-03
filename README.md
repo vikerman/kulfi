@@ -15,7 +15,7 @@ Aspirational ideas:
 
 ### Tooling
 
-- Fast no-bundler dev mode 
+- Fast no-bundler dev mode
 - Static checks for performance patterns/anti-patterns
 - Use budgets for everything - JS, HTML, CSS
 - Integrate with performance tools in CI to catch regressions
