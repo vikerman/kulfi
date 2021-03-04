@@ -3,8 +3,11 @@
   "extends": ["@open-wc/eslint-config", "eslint-config-prettier"],
   "plugins": ["@typescript-eslint"],
   "rules": {
+    "max-classes-per-file": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error"],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
     "import/no-unresolved": "off",
     "import/extensions": [
       "error",

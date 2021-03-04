@@ -1,1 +1,1 @@
-export * from './src/spilt-element.js';
+export * from './src/lazy-element.js';
