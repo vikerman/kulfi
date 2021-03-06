@@ -90,7 +90,7 @@ export abstract class LazyElement extends ReactiveElement {
     this.prefetchRenderer();
   }
 
-  private static setupIntersectionObserver() {
+  private static setupIntersectionObserver(el: LazyElement) {
     if (LazyElement._observer == null) {
       LazyElement._observer = new IntersectionObserver(entries => {
         for (const e of entries) {
@@ -99,6 +99,7 @@ export abstract class LazyElement extends ReactiveElement {
         }
       }, INTERSECTION_CONFIG);
     }
+    LazyElement._observer.observe(el);
   }
 
   private saveInitialPropertyValues() {
@@ -116,8 +117,7 @@ export abstract class LazyElement extends ReactiveElement {
         this.onVisible();
       } else {
         // Setup first level loading based on visibility.
-	LazyElement.setupIntersectionObserver();
-        LazyElement._observer.observe(this);
+        LazyElement.setupIntersectionObserver(this);
       }
 
       // Store initial attribute values for lazy hydration.
