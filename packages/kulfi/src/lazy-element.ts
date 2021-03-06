@@ -70,15 +70,15 @@ export abstract class LazyElement extends ReactiveElement {
   }
 
   private prefetchRenderer() {
-    // Use prefetch feature of https://github.com/vikerman/rollup-plugin-hoist-import-deps#prefetch-support
-    // to prefetch the LazyRenderer and all its static import deps.
-    // eslint-disable-next-line dot-notation
-    (window as any)['HOIST_PREFETCH'] = true;
-    try {
-      this.load();
-    } finally {
-      // eslint-disable-next-line dot-notation
-      (window as any)['HOIST_PREFETCH'] = undefined;
+    if ((window as any)['HAS_HOIST_PREFETCH']) {
+      // Use prefetch feature of https://github.com/vikerman/rollup-plugin-hoist-import-deps#prefetch-support
+      // to prefetch the LazyRenderer and all its static import deps.
+      (window as any)['HOIST_PREFETCH'] = true;
+      try {
+        this.load();
+      } finally {
+        (window as any)['HOIST_PREFETCH'] = undefined;
+      }
     }
   }
 
@@ -90,7 +90,7 @@ export abstract class LazyElement extends ReactiveElement {
     this.prefetchRenderer();
   }
 
-  private setupIntersectionObserver() {
+  private static setupIntersectionObserver() {
     if (LazyElement._observer == null) {
       LazyElement._observer = new IntersectionObserver(entries => {
         for (const e of entries) {
@@ -99,7 +99,6 @@ export abstract class LazyElement extends ReactiveElement {
         }
       }, INTERSECTION_CONFIG);
     }
-    LazyElement._observer.observe(this);
   }
 
   private saveInitialPropertyValues() {
@@ -117,7 +116,8 @@ export abstract class LazyElement extends ReactiveElement {
         this.onVisible();
       } else {
         // Setup first level loading based on visibility.
-        this.setupIntersectionObserver();
+	LazyElement.setupIntersectionObserver();
+        LazyElement._observer.observe(this);
       }
 
       // Store initial attribute values for lazy hydration.
