@@ -94,8 +94,10 @@ export abstract class LazyElement extends ReactiveElement {
     if (LazyElement._observer == null) {
       LazyElement._observer = new IntersectionObserver(entries => {
         for (const e of entries) {
-          (e.target as LazyElement)?.onVisible();
-          LazyElement._observer?.unobserve(e.target);
+          if (e.isIntersecting) {
+            (e.target as LazyElement)?.onVisible();
+            LazyElement._observer?.unobserve(e.target);
+          }
         }
       }, INTERSECTION_CONFIG);
     }
