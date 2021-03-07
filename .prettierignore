@@ -9,6 +9,14 @@ lerna-debug.log
 *.tsbuildinfo
 .DS_Store
 
+packages/example-app/**/node_modules/
+packages/example-app/**/out-tsc/
+packages/example-app/**/dist/
+
+packages/example-app/**/*.tgz
+packages/example-app/**/*.tsbuildinfo
+packages/example-app/**/.DS_Store
+
 packages/kulfi/**/node_modules/
 packages/kulfi/**/dist/
 
