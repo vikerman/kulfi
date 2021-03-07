@@ -48,8 +48,6 @@ export abstract class LazyElement extends ReactiveElement {
 
   private _state = LazyState.UNINITIALZIED;
 
-  private _renderer?: LazyRenderer<this>;
-
   private _isFirstUpdate = true;
 
   private convertShadowRoot() {
@@ -69,25 +67,9 @@ export abstract class LazyElement extends ReactiveElement {
     this._state = LazyState.NEEDS_HYDRATION;
   }
 
-  private prefetchRenderer() {
-    if ((window as any)['HAS_HOIST_PREFETCH']) {
-      // Use prefetch feature of https://github.com/vikerman/rollup-plugin-hoist-import-deps#prefetch-support
-      // to prefetch the LazyRenderer and all its static import deps.
-      (window as any)['HOIST_PREFETCH'] = true;
-      try {
-        this.load();
-      } finally {
-        (window as any)['HOIST_PREFETCH'] = undefined;
-      }
-    }
-  }
-
   private onVisible() {
     // Move SSR-ed Declarative Shadow DOM nodes to shadow DOM if not already done so.
     this.convertShadowRoot();
-
-    // Start prefetching the renderer code (and its static dependencies).
-    this.prefetchRenderer();
   }
 
   private static setupIntersectionObserver(el: LazyElement) {
@@ -143,7 +125,7 @@ export abstract class LazyElement extends ReactiveElement {
     }
 
     // Hydrate with initial properties.
-    const result = this._renderer!.render(this);
+    const result = this.render();
     hydrate(result, this.renderRoot, this._renderOptions);
 
     // Restore current properties.
@@ -187,26 +169,9 @@ export abstract class LazyElement extends ReactiveElement {
     return renderRoot;
   }
 
-  protected async performUpdate() {
-    // Skip first update if in non-READY(Lazy) mode.
-    if (this._state < LazyState.READY && this._isFirstUpdate) {
-      // Do nothing.
-    } else if (this._renderer == null) {
-      // Load LazyRenderer before doing actual update.
-      const Clazz = await this.load();
-      this._renderer = new Clazz();
-    }
-    super.performUpdate();
-  }
-
   protected update(changedProperties: PropertyValues) {
     if (this._state < LazyState.READY && this._isFirstUpdate) {
       this._isFirstUpdate = false;
-      return;
-    }
-
-    if (this._renderer == null) {
-      // We shouldn't be here. Renderer should be loaded in performUpdate.
       return;
     }
 
@@ -221,7 +186,7 @@ export abstract class LazyElement extends ReactiveElement {
       // falls through
       case LazyState.READY:
         render(
-          this._renderer.render(this),
+          this.render(),
           this.renderRoot as HTMLElement,
           this._renderOptions
         );
@@ -234,5 +199,7 @@ export abstract class LazyElement extends ReactiveElement {
   }
 
   // Overridden by user to lazily load the actual rendering code.
-  abstract load(): Promise<typeof LazyRenderer>;
+  protected render(): unknown {
+    return noChange;
+  }
 }
