@@ -2,12 +2,16 @@ import {renderModule} from '@lit-labs/ssr/lib/render-module.js';
 import {Readable} from 'stream';
 
 const DECLARATIVE_SHADOW_DOM_POLYFILL = `<script>
-document.body.querySelectorAll('template[shadowroot]').forEach(t => {
-  t.parentElement.attachShadow({
-    mode: t.getAttribute('shadowroot'),
-  }).appendChild(t.content);
-  t.remove();
-});
+window.convertShadowRoot = function() {
+  if (HTMLTemplateElement.prototype.hasOwnProperty('shadowRoot')) return;
+  document.body.querySelectorAll('template[shadowroot]').forEach(t => {
+    t.parentElement.attachShadow({
+      mode: t.getAttribute('shadowroot'),
+    }).appendChild(t.content);
+    t.remove();
+  });
+};
+window.convertShadowRoot();
 </script>
 `;
 
