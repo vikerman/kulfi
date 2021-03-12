@@ -18,6 +18,9 @@ window.convertShadowRoot();
 const PAGE_PLACEHOLDER = '<!--PAGE-->';
 const PAGE_END_PLACEHOLDER = '<!--/PAGE-->';
 
+const HEAD_PLACEHOLDER = '<!--HEAD-->';
+const HEAD_END_PLACEHOLDER = '<!--/HEAD-->';
+
 function toPromise(stream) {
   return new Promise(resolve => {
     let result = '';
@@ -45,12 +48,20 @@ export function ssrPlugin(basePathParam) {
           [process.cwd(), basePath, context.originalUrl]
         );
         // For dev mode just collect the result and return instead of actually streaming.
-        const content =
+        const head =
+          HEAD_PLACEHOLDER +
+          (await toPromise(Readable.from(ssrResult.head))) +
+          HEAD_END_PLACEHOLDER;
+        const page =
           PAGE_PLACEHOLDER +
-          (await toPromise(Readable.from(ssrResult))) +
+          (await toPromise(Readable.from(ssrResult.page))) +
           PAGE_END_PLACEHOLDER +
           DECLARATIVE_SHADOW_DOM_POLYFILL;
-        return {body: context.body.replace(PAGE_PLACEHOLDER, content)};
+        return {
+          body: context.body
+            .replace(HEAD_PLACEHOLDER, head)
+            .replace(PAGE_PLACEHOLDER, page),
+        };
       }
       return undefined;
     },

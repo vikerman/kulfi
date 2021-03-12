@@ -38,13 +38,24 @@ export async function renderPath(cwd, basePath, urlPath) {
     try {
       if (fs.lstatSync(indexPath, {throwIfNoEntry: false})?.isFile()) {
         const module = await import(indexPath);
-        if (module && typeof module.render === 'function') {
-          return render(module.render());
+        if (module) {
+          // render() is a required method for a page. head() is optional.
+          const result = {head: '', page: ''};
+          if (typeof module.render === 'function') {
+            result.page = render(module.render());
+            if (typeof module.head === 'function') {
+              result.head = render(module.head());
+            }
+            return result;
+          }
+          // else fall through to 404 case.
         }
+        // else fall through to 404 case.
       }
     } catch (e) {
       // Needed till throwIfNotEntry is supported in lstatSync.
     }
   }
-  return '<h2>Page Not Found</h2>';
+  // 404.
+  return {head: '', page: '<h2>Page Not Found</h2>'};
 }
