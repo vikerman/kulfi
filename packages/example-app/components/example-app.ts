@@ -1,9 +1,11 @@
+import 'lit/hydrate-support.js';
 import {LitElement, html, css} from 'lit';
-import {property} from 'lit/decorators.js';
+import {property, customElement} from 'lit/decorators.js';
 import {openWcLogo} from './open-wc-logo.js';
 
+@customElement('example-app')
 export class ExampleApp extends LitElement {
-  @property({type: String}) title = 'My app';
+  @property() title = 'My app';
 
   static styles = css`
     :host {
@@ -54,7 +56,7 @@ export class ExampleApp extends LitElement {
         <div class="logo">${openWcLogo}</div>
         <h1>${this.title}</h1>
 
-        <p>Edit <code>src/ExampleApp.js</code> and save to reload.</p>
+        <p>Edit <code>src/ExampleApp.ts</code> and save to reload!!</p>
         <a
           class="app-link"
           href="https://open-wc.org/guides/developing-components/code-examples"
