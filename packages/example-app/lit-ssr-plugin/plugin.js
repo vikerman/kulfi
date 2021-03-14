@@ -6,7 +6,7 @@ window.convertShadowRoot = function() {
   if (HTMLTemplateElement.prototype.hasOwnProperty('shadowRoot')) return;
   document.body.querySelectorAll('template[shadowroot]').forEach(t => {
     t.parentElement.attachShadow({
-      mode: t.getAttribute('shadowroot'),
+      mode: 'open',
     }).appendChild(t.content);
     t.remove();
   });
@@ -16,10 +16,12 @@ window.convertShadowRoot();
 `;
 
 const PAGE_PLACEHOLDER = '<!--PAGE-->';
-const PAGE_END_PLACEHOLDER = '<!--/PAGE-->';
+const PAGE_START_COMMENT = '<!--PAGE-->';
+const PAGE_END_COMMENT = '<!--/PAGE-->';
 
 const HEAD_PLACEHOLDER = '<!--HEAD-->';
-const HEAD_END_PLACEHOLDER = '<!--/HEAD-->';
+const HEAD_START_COMMENT = '<!--HEAD-->';
+const HEAD_END_COMMENT = '<!--/HEAD-->';
 
 function toPromise(stream) {
   return new Promise(resolve => {
@@ -41,6 +43,7 @@ export function ssrPlugin(basePathParam) {
     async transform(context) {
       if (context.response.is('html')) {
         // Render the path through lit-ssr.
+        // TODO: Don't reload the module every time?
         const ssrResult = await renderModule(
           './renderPath.js',
           import.meta.url,
@@ -49,18 +52,22 @@ export function ssrPlugin(basePathParam) {
         );
         // For dev mode just collect the result and return instead of actually streaming.
         const head =
-          HEAD_PLACEHOLDER +
+          HEAD_START_COMMENT +
           (await toPromise(Readable.from(ssrResult.head))) +
-          HEAD_END_PLACEHOLDER;
+          HEAD_END_COMMENT;
         const page =
-          PAGE_PLACEHOLDER +
+          PAGE_START_COMMENT +
           (await toPromise(Readable.from(ssrResult.page))) +
-          PAGE_END_PLACEHOLDER +
-          DECLARATIVE_SHADOW_DOM_POLYFILL;
+          PAGE_END_COMMENT;
+        const shell = await toPromise(Readable.from(ssrResult.shell));
+
+        let body = context.body.replace(HEAD_PLACEHOLDER, head);
+        if (shell !== '<!--PAGE-->') {
+          body = body.replace(PAGE_PLACEHOLDER, shell);
+        }
+        body = body.replace(PAGE_PLACEHOLDER, page);
         return {
-          body: context.body
-            .replace(HEAD_PLACEHOLDER, head)
-            .replace(PAGE_PLACEHOLDER, page),
+          body: body + DECLARATIVE_SHADOW_DOM_POLYFILL,
         };
       }
       return undefined;

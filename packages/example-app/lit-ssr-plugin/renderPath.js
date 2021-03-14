@@ -3,6 +3,18 @@ import * as path from 'path';
 import {render} from '@lit-labs/ssr/lib/render-lit-html.js';
 
 export async function renderPath(cwd, basePath, urlPath) {
+  // Try to render the shell if it exists.
+  const shellPath = path.join(cwd, basePath, '/pages/shell.js');
+  let shellResult = '<!--PAGE-->';
+  try {
+    if (fs.lstatSync(shellPath, {throwIfNoEntry: false})?.isFile()) {
+      const module = await import(shellPath);
+      shellResult = render(module.render());
+    }
+  } catch (e) {
+    // shell module not found.
+  }
+
   // Parse the path and find the matching page.
   const parts = urlPath.split('/');
   let targetPath = path.join(cwd, basePath, '/pages');
@@ -25,11 +37,8 @@ export async function renderPath(cwd, basePath, urlPath) {
         break;
       }
     } catch (e) {
-      // Needed till throwIfNotEntry is supported in lstatSync.
-      if (e.code === 'ENOENT') {
-        found = false;
-        break;
-      }
+      found = false;
+      break;
     }
   }
   if (found) {
@@ -40,7 +49,7 @@ export async function renderPath(cwd, basePath, urlPath) {
         const module = await import(indexPath);
         if (module) {
           // render() is a required method for a page. head() is optional.
-          const result = {head: '', page: ''};
+          const result = {head: '', shell: shellResult, page: ''};
           if (typeof module.render === 'function') {
             result.page = render(module.render());
             if (typeof module.head === 'function') {
@@ -53,9 +62,9 @@ export async function renderPath(cwd, basePath, urlPath) {
         // else fall through to 404 case.
       }
     } catch (e) {
-      // Needed till throwIfNotEntry is supported in lstatSync.
+      // Page module not found or not valid.
     }
   }
   // 404.
-  return {head: '', page: '<h2>Page Not Found</h2>'};
+  return {head: '', shell: '<!--PAGE-->', page: '<h2>Page Not Found</h2>'};
 }
