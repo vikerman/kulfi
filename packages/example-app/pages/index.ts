@@ -12,7 +12,11 @@ export function head() {
 export function render() {
   return html`
     <h1>Hello World!!</h1>
+    <script
+      async
+      type="module"
+      src="out-tsc/components/example-app.js"
+    ></script>
     <example-app></example-app>
-    <script type="module" src="out-tsc/components/example-app.js"></script>
   `;
 }
