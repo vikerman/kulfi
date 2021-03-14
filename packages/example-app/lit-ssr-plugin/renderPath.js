@@ -3,6 +3,8 @@ import * as path from 'path';
 import {render} from '@lit-labs/ssr/lib/render-lit-html.js';
 
 export async function renderPath(cwd, basePath, urlPath) {
+  global['SCRIPT_BASE_PATH'] = basePath;
+
   // Try to render the shell if it exists.
   const shellPath = path.join(cwd, basePath, '/pages/shell.js');
   let shellResult = '<!--PAGE-->';

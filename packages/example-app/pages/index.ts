@@ -1,6 +1,7 @@
 import {html} from 'lit';
 
 import '../components/example-app.js';
+import {scriptTag} from '../server/scriptTag.js';
 
 export function head() {
   return html`
@@ -12,11 +13,7 @@ export function head() {
 export function render() {
   return html`
     <h1>Hello World!!</h1>
-    <script
-      async
-      type="module"
-      src="out-tsc/components/example-app.js"
-    ></script>
+    ${scriptTag('components/example-app.js')}
     <example-app></example-app>
   `;
 }
