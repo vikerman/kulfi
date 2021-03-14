@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {renderModule} from '@lit-labs/ssr/lib/render-module.js';
 import {Readable} from 'stream';
 
@@ -40,6 +41,10 @@ export function ssrPlugin(basePathParam) {
   let cacheKey = 0;
   return {
     name: 'lit-ssr-plugin',
+    serverStart(args) {
+      // Add the pages directory to the watch list.
+      args.fileWatcher.add(path.join(basePath, '/pages'));
+    },
     async transform(context) {
       if (context.response.is('html')) {
         // Render the path through lit-ssr.
