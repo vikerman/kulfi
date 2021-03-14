@@ -2,19 +2,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {render} from '@lit-labs/ssr/lib/render-lit-html.js';
 
-export async function renderPath(cwd, basePath, urlPath) {
+export async function renderPath(cwd, basePath, urlPath, useShell) {
   global['SCRIPT_BASE_PATH'] = basePath;
 
   // Try to render the shell if it exists.
   const shellPath = path.join(cwd, basePath, '/pages/shell.js');
   let shellResult = '<!--PAGE-->';
-  try {
-    if (fs.lstatSync(shellPath, {throwIfNoEntry: false})?.isFile()) {
-      const module = await import(shellPath);
-      shellResult = render(module.render());
+  if (useShell) {
+    try {
+      if (fs.lstatSync(shellPath, {throwIfNoEntry: false})?.isFile()) {
+        const module = await import(shellPath);
+        shellResult = render(module.render());
+      }
+    } catch (e) {
+      // shell module not found.
     }
-  } catch (e) {
-    // shell module not found.
   }
 
   // Parse the path and find the matching page.
@@ -29,7 +31,7 @@ export async function renderPath(cwd, basePath, urlPath) {
     }
 
     // Ignore last part of the path if it is explcitly index.html.
-    if (i === parts.length - 1 && p === 'index.html') {
+    if (i === parts.length - 1 && (p === 'index.html' || p === 'index.json')) {
       break;
     }
     targetPath += `/${p}`;

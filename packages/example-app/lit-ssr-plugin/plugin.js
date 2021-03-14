@@ -17,12 +17,12 @@ window.convertShadowRoot();
 `;
 
 const PAGE_PLACEHOLDER = '<!--PAGE-->';
-const PAGE_START_COMMENT = '<!--PAGE-->';
-const PAGE_END_COMMENT = '<!--/PAGE-->';
+const PAGE_START = '<div id="__page__"><div>';
+const PAGE_END = '</div></div>';
 
 const HEAD_PLACEHOLDER = '<!--HEAD-->';
-const HEAD_START_COMMENT = '<!--HEAD-->';
-const HEAD_END_COMMENT = '<!--/HEAD-->';
+const HEAD_START = '<!--HEAD-->';
+const HEAD_END = '<!--/HEAD-->';
 
 function toPromise(stream) {
   return new Promise(resolve => {
@@ -53,17 +53,17 @@ export function ssrPlugin(basePathParam) {
           './renderPath.js',
           import.meta.url,
           'renderPath',
-          [process.cwd(), basePath, context.originalUrl]
+          [process.cwd(), basePath, context.originalUrl, true]
         );
         // For dev mode just collect the result and return instead of actually streaming.
         const head =
-          HEAD_START_COMMENT +
+          HEAD_START +
           (await toPromise(Readable.from(ssrResult.head))) +
-          HEAD_END_COMMENT;
+          HEAD_END;
         const page =
-          PAGE_START_COMMENT +
+          PAGE_START +
           (await toPromise(Readable.from(ssrResult.page))) +
-          PAGE_END_COMMENT;
+          PAGE_END;
         const shell = await toPromise(Readable.from(ssrResult.shell));
 
         let body = context.body.replace(HEAD_PLACEHOLDER, head);
@@ -86,6 +86,24 @@ export function ssrPlugin(basePathParam) {
         return cacheKey.toString();
       }
       return '';
+    },
+    async serve(context) {
+      // Client side navigation requests are handled through a special .json handler to
+      // return SSR-ed content as JSON responses which can be swapped in by the router.
+      if (context.path.endsWith('/index.json')) {
+        const ssrResult = await renderModule(
+          './renderPath.js',
+          import.meta.url,
+          'renderPath',
+          [process.cwd(), basePath, context.originalUrl, true]
+        );
+        const result = {
+          head: await toPromise(Readable.from(ssrResult.head)),
+          page: await toPromise(Readable.from(ssrResult.page)),
+        };
+        return {body: JSON.stringify(result), type: 'json'};
+      }
+      return undefined;
     },
   };
 }
