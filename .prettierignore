@@ -5,6 +5,10 @@
 
 node_modules/
 lerna-debug.log
+
+*.js
+*.d.ts
+
 *.tgz
 *.tsbuildinfo
 .DS_Store
@@ -18,7 +22,6 @@ packages/example-app/**/*.tsbuildinfo
 packages/example-app/**/.DS_Store
 
 packages/kulfi/**/node_modules/
-packages/kulfi/**/dist/
 
 packages/kulfi/**/*.tgz
 packages/kulfi/**/*.tsbuildinfo
