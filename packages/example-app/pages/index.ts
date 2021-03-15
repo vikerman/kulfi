@@ -1,7 +1,7 @@
 import {html} from 'lit';
 
 import '../components/example-app.js';
-import {scriptTag} from 'kulfi/pages/scriptTag.js';
+import {importComponents} from 'kulfi/pages/importComponents.js';
 
 export function head() {
   return html`
@@ -13,7 +13,7 @@ export function head() {
 export function render() {
   return html`
     <h1>Hello World!!</h1>
-    ${scriptTag('components/example-app.js')}
+    ${importComponents('components/example-app.js')}
     <example-app></example-app>
   `;
 }

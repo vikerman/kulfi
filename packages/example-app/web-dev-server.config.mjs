@@ -1,5 +1,5 @@
 // import { hmrPlugin, presets } from '@open-wc/dev-server-hmr';
-import {ssrPlugin} from './lit-ssr-plugin/plugin.js';
+import {ssrPlugin} from 'kulfi/ssr-plugin/plugin.js';
 
 /** Use Hot Module replacement by adding --hmr to the start command */
 const hmr = process.argv.includes('--hmr');

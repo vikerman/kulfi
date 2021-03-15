@@ -24,7 +24,7 @@ const HEAD_PLACEHOLDER = '<!--HEAD-->';
 const HEAD_START = '<!--HEAD-->';
 const HEAD_END = '<!--/HEAD-->';
 
-function toPromise(stream) {
+function toPromise(stream: Readable): Promise<string> {
   return new Promise(resolve => {
     let result = '';
     stream.on('end', () => {
@@ -36,16 +36,25 @@ function toPromise(stream) {
   });
 }
 
-export function ssrPlugin(basePathParam) {
+// Highly simplified html escape.
+function htmlEscape(s: string) {
+  return s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+export function ssrPlugin(basePathParam: string) {
   const basePath = basePathParam || '';
   let cacheKey = 0;
   return {
     name: 'lit-ssr-plugin',
-    serverStart(args) {
+    serverStart(args: {fileWatcher: {add: Function}}) {
       // Add the pages directory to the watch list.
       args.fileWatcher.add(path.join(basePath, '/pages'));
     },
-    async transform(context) {
+    async transform(context: {
+      response: any;
+      originalUrl: String;
+      body: String;
+    }) {
       if (context.response.is('html')) {
         // Render the path through lit-ssr.
         // TODO: Don't reload the module every time?
@@ -55,6 +64,17 @@ export function ssrPlugin(basePathParam) {
           'renderPath',
           [process.cwd(), basePath, context.originalUrl, true]
         );
+
+        if (ssrResult.err) {
+          // In dev mode return any underlying exception text.
+          // Don't do that in prod mode.
+          return {
+            body: `<html><body><pre>${htmlEscape(
+              ssrResult.err.stack
+            )}</pre></body></html>`,
+          };
+        }
+
         // For dev mode just collect the result and return instead of actually streaming.
         const head =
           HEAD_START +
@@ -77,7 +97,7 @@ export function ssrPlugin(basePathParam) {
       }
       return undefined;
     },
-    transformCacheKey(context) {
+    transformCacheKey(context: {request: {url: String}}) {
       // Never cache SSR-ed index.html by having a rolling cache key.
       // This will eventually fill up the LRU cache in the WebDevServer and get discarded.
       // Maybe better to look into a way to not cache this in the first place.
@@ -87,7 +107,7 @@ export function ssrPlugin(basePathParam) {
       }
       return '';
     },
-    async serve(context) {
+    async serve(context: {path: String; originalUrl: String}) {
       // Client side navigation requests are handled through a special .json handler to
       // return SSR-ed content as JSON responses which can be swapped in by the router.
       if (context.path.endsWith('/index.json')) {

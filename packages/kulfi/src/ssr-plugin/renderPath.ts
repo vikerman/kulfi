@@ -2,15 +2,20 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {render} from '@lit-labs/ssr/lib/render-lit-html.js';
 
-export async function renderPath(cwd, basePath, urlPath, useShell) {
-  global['SCRIPT_BASE_PATH'] = basePath;
+export async function renderPath(
+  cwd: string,
+  basePath: string,
+  urlPath: string,
+  useShell: boolean
+) {
+  (global as any)['SCRIPT_BASE_PATH'] = basePath;
 
   // Try to render the shell if it exists.
   const shellPath = path.join(cwd, basePath, '/pages/shell.js');
-  let shellResult = '<!--PAGE-->';
+  let shellResult: String | Iterable<String> = '<!--PAGE-->';
   if (useShell) {
     try {
-      if (fs.lstatSync(shellPath, {throwIfNoEntry: false})?.isFile()) {
+      if (fs.lstatSync(shellPath)?.isFile()) {
         const module = await import(shellPath);
         shellResult = render(module.render());
       }
@@ -36,7 +41,7 @@ export async function renderPath(cwd, basePath, urlPath, useShell) {
     }
     targetPath += `/${p}`;
     try {
-      if (!fs.lstatSync(targetPath, {throwIfNoEntry: false})?.isDirectory()) {
+      if (!fs.lstatSync(targetPath)?.isDirectory()) {
         found = false;
         break;
       }
@@ -45,15 +50,21 @@ export async function renderPath(cwd, basePath, urlPath, useShell) {
       break;
     }
   }
+
+  let err: Error | undefined;
   if (found) {
     // Try to load the renderer from the index.js file.
     const indexPath = `${targetPath}/index.js`;
     try {
-      if (fs.lstatSync(indexPath, {throwIfNoEntry: false})?.isFile()) {
+      if (fs.lstatSync(indexPath)?.isFile()) {
         const module = await import(indexPath);
         if (module) {
           // render() is a required method for a page. head() is optional.
-          const result = {head: '', shell: shellResult, page: ''};
+          const result: {
+            head: String | Iterable<String>;
+            shell: String | Iterable<String>;
+            page: String | Iterable<String>;
+          } = {head: '', shell: shellResult, page: ''};
           if (typeof module.render === 'function') {
             result.page = render(module.render());
             if (typeof module.head === 'function') {
@@ -67,8 +78,9 @@ export async function renderPath(cwd, basePath, urlPath, useShell) {
       }
     } catch (e) {
       // Page module not found or not valid.
+      err = e;
     }
   }
   // 404.
-  return {head: '', shell: '<!--PAGE-->', page: '<h2>Page Not Found</h2>'};
+  return {head: '', shell: '<!--PAGE-->', page: '<h2>Page Not Found</h2>', err};
 }

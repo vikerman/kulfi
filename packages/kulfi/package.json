@@ -6,19 +6,23 @@
   },
   "description": "Runtime library for the kulfi Web SDK",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist",
+    "clean": "rimraf pages ssr-plugin *.js *.d.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "vikram.subramanian@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "lit": "^2.0.0-pre.1"
+    "lit": "^2.0.0-pre.1",
+    "@lit-labs/ssr": "file:../../../schnell/lit-html/packages/lit-ssr"
   },
   "files": [
-    "/dist/",
+    "/index.{js,d.ts}",
+    "/ssr-plugin/plugin.{js,d.ts}",
+    "/ssr-plugin/renderPath.{js,d.ts}",
+    "/pages/importComponents.{js,d.ts}",
     "README.md"
   ],
   "devDependencies": {

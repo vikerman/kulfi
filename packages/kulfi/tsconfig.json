@@ -10,7 +10,9 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "declaration": true,
-    "outDir": "dist"
+    "outDir": ".",
+    "rootDir": "./src"
   },
-  "include": ["**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": []
 }
