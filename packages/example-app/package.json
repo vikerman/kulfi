@@ -21,6 +21,7 @@
   "author": "example-app",
   "license": "MIT",
   "dependencies": {
+    "kulfi": "^0.0.2",
     "lit": "^2.0.0-pre.1",
     "@lit-labs/ssr": "file:../../../schnell/lit-html/packages/lit-ssr"
   }

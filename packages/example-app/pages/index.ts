@@ -1,7 +1,7 @@
 import {html} from 'lit';
 
 import '../components/example-app.js';
-import {scriptTag} from '../server/scriptTag.js';
+import {scriptTag} from 'kulfi/pages/scriptTag.js';
 
 export function head() {
   return html`
