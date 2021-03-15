@@ -3,7 +3,8 @@
   "scripts": {
     "build": "rimraf dist && tsc && rollup -c rollup.config.js",
     "start:build": "npm run build && web-dev-server --root-dir dist --app-index index.html --open --compatibility none",
-    "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"NODE_OPTIONS=--experimental-vm-modules wds\""
+    "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"NODE_OPTIONS=--experimental-vm-modules wds\"",
+    "clean": "rimraf dist out-tsc"
   },
   "devDependencies": {
     "@open-wc/building-rollup": "^1.9.4",
