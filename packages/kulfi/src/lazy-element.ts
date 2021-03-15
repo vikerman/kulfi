@@ -55,12 +55,17 @@ export abstract class LazyElement extends ReactiveElement {
     if (this._state !== LazyState.NEEDS_SHADOW_ROOT) {
       return;
     }
-    this.querySelectorAll('template[shadowroot]').forEach(t => {
-      t.parentElement!.attachShadow({
-        mode: t.getAttribute('shadowroot') as 'closed' | 'open',
-      }).appendChild((t as HTMLTemplateElement).content);
-      t.remove();
-    });
+    const t = this.querySelector('template[shadowroot]');
+    if (t == null) {
+      // We should not be here.
+      // But if we are just proceed as if we don't need hydration.
+      this._state = LazyState.READY;
+      return;
+    }
+    this.attachShadow({mode: 'open'}).appendChild(
+      (t as HTMLTemplateElement).content
+    );
+    t.remove();
     (this as {
       renderRoot: Element | DocumentFragment;
     }).renderRoot = this.shadowRoot!;
