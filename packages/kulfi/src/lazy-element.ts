@@ -67,9 +67,43 @@ export abstract class LazyElement extends ReactiveElement {
     this._state = LazyState.NEEDS_HYDRATION;
   }
 
+  private hydrate(updated: boolean) {
+    if (this._state !== LazyState.NEEDS_HYDRATION) {
+      return;
+    }
+
+    // Save current values and restore initial properties if there has been an updated.
+    const currentValues: Map<String | number | symbol, unknown> = new Map();
+    if (updated) {
+      for (const [k] of (this.constructor as typeof ReactiveElement)
+        .elementProperties!) {
+        currentValues.set(k, (this as any)[k]);
+        (this as any)[k] = this._initialValues.get(k);
+      }
+    }
+
+    // Hydrate with initial properties.
+    const result = this.render();
+    hydrate(result, this.renderRoot, this._renderOptions);
+
+    // Restore current properties.
+    if (updated) {
+      for (const [k] of (this.constructor as typeof ReactiveElement)
+        .elementProperties!) {
+        (this as any)[k] = currentValues.get(k);
+      }
+    }
+
+    // TODO: Check pending events to replay
+    this._state = LazyState.READY;
+  }
+
   private onVisible() {
     // Move SSR-ed Declarative Shadow DOM nodes to shadow DOM if not already done so.
     this.convertShadowRoot();
+
+    // Hydrate the DOM nodes - ready to respond to events.
+    this.hydrate(/* updated */ false);
   }
 
   private static setupIntersectionObserver(el: LazyElement) {
@@ -109,33 +143,6 @@ export abstract class LazyElement extends ReactiveElement {
 
       // TODO: Setup temporary event listeners to know when to hydrate.
     }
-  }
-
-  private hydrate() {
-    if (this._state !== LazyState.NEEDS_SHADOW_ROOT) {
-      return;
-    }
-
-    // Save current values and restore initial properties.
-    const currentValues: Map<String | number | symbol, unknown> = new Map();
-    for (const [k] of (this.constructor as typeof ReactiveElement)
-      .elementProperties!) {
-      currentValues.set(k, (this as any)[k]);
-      (this as any)[k] = this._initialValues.get(k);
-    }
-
-    // Hydrate with initial properties.
-    const result = this.render();
-    hydrate(result, this.renderRoot, this._renderOptions);
-
-    // Restore current properties.
-    for (const [k] of (this.constructor as typeof ReactiveElement)
-      .elementProperties!) {
-      (this as any)[k] = currentValues.get(k);
-    }
-
-    // TODO: Check pending events to replay
-    this._state = LazyState.READY;
   }
 
   connectedCallback() {
@@ -182,7 +189,7 @@ export abstract class LazyElement extends ReactiveElement {
         this.convertShadowRoot();
       // falls through
       case LazyState.NEEDS_HYDRATION:
-        this.hydrate();
+        this.hydrate(/* updated */ true);
       // falls through
       case LazyState.READY:
         render(
