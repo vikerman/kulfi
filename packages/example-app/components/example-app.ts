@@ -1,4 +1,5 @@
-import 'lit/hydrate-support.js';
+import 'kulfi/hydrate-support.js';
+
 import {LitElement, html, css} from 'lit';
 import {property, customElement} from 'lit/decorators.js';
 import {openWcLogo} from './open-wc-logo.js';

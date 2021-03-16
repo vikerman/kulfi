@@ -12,8 +12,8 @@ export function head() {
 
 export function render() {
   return html`
-    <h1>Hello World!!</h1>
+    <h1>Hello World!!!!</h1>
     ${loadModules('components/example-app.js')}
-    <example-app></example-app>
+    <example-app title="Test"></example-app>
   `;
 }

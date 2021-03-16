@@ -57,9 +57,6 @@ function replacePage(page: string) {
   }
   pageRoot.firstElementChild?.remove();
   pageRoot.appendChild(newPage);
-
-  // Call the declarative Shadow DOM "polyfill" function.
-  (window as any).convertShadowRoot();
 }
 
 async function locationUpdated(location: Location) {
