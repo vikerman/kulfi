@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf pages ssr-plugin *.js *.d.ts",
+    "clean": "rimraf pages ssr-plugin *.js *.js.map *.d.ts *.d.ts.map",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "vikram.subramanian@gmail.com",

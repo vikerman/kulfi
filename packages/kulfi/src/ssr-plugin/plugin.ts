@@ -118,8 +118,12 @@ export function ssrPlugin(basePathParam: string) {
           [process.cwd(), basePath, context.originalUrl, true]
         );
         const result = {
-          head: await toPromise(Readable.from(ssrResult.head)),
-          page: await toPromise(Readable.from(ssrResult.page)),
+          head: `<head>${await toPromise(
+            Readable.from(ssrResult.head)
+          )}</head>`,
+          page: `<body>${await toPromise(
+            Readable.from(ssrResult.page)
+          )}</body>`,
         };
         return {body: JSON.stringify(result), type: 'json'};
       }
