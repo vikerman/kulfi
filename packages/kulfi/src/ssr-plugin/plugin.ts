@@ -1,6 +1,7 @@
 import * as path from 'path';
-import {renderModule} from '@lit-labs/ssr/lib/render-module.js';
 import {Readable} from 'stream';
+
+import {renderPath} from '../ssr/renderPath.js';
 
 const DECLARATIVE_SHADOW_DOM_POLYFILL = `<script>
 window.convertShadowRoot = function() {
@@ -52,17 +53,16 @@ export function ssrPlugin(basePathParam: string) {
     },
     async transform(context: {
       response: any;
-      originalUrl: String;
-      body: String;
+      originalUrl: string;
+      body: string;
     }) {
       if (context.response.is('html')) {
         // Render the path through lit-ssr.
-        // TODO: Don't reload the module every time?
-        const ssrResult = await renderModule(
-          './renderPath.js',
-          import.meta.url,
-          'renderPath',
-          [process.cwd(), basePath, context.originalUrl, true]
+        const ssrResult = await renderPath(
+          process.cwd(),
+          basePath,
+          context.originalUrl,
+          true
         );
 
         if (ssrResult.err) {
@@ -97,7 +97,7 @@ export function ssrPlugin(basePathParam: string) {
       }
       return undefined;
     },
-    transformCacheKey(context: {request: {url: String}}) {
+    transformCacheKey(context: {request: {url: string}}) {
       // Never cache SSR-ed index.html by having a rolling cache key.
       // This will eventually fill up the LRU cache in the WebDevServer and get discarded.
       // Maybe better to look into a way to not cache this in the first place.
@@ -107,15 +107,15 @@ export function ssrPlugin(basePathParam: string) {
       }
       return '';
     },
-    async serve(context: {path: String; originalUrl: String}) {
+    async serve(context: {path: string; originalUrl: string}) {
       // Client side navigation requests are handled through a special .json handler to
       // return SSR-ed content as JSON responses which can be swapped in by the router.
       if (context.path.endsWith('/index.json')) {
-        const ssrResult = await renderModule(
-          './renderPath.js',
-          import.meta.url,
-          'renderPath',
-          [process.cwd(), basePath, context.originalUrl, true]
+        const ssrResult = await renderPath(
+          process.cwd(),
+          basePath,
+          context.originalUrl,
+          false
         );
         const result = {
           head: `<head>${await toPromise(

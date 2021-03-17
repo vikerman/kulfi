@@ -1,7 +1,8 @@
 /* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
-import {PropertyValues, ReactiveElement, render, RenderOptions} from 'lit';
-import {hydrate} from 'lit/hydrate.js';
+import {PropertyValues, ReactiveElement} from '@lit/reactive-element';
+import {render, RenderOptions} from 'lit-html';
+import {hydrate} from 'lit-html/hydrate.js';
 
 // Different Lazy states LazyElement takes before being in
 // regularly renderable READY state.

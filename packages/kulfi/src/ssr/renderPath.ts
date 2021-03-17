@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {render} from '@lit-labs/ssr/lib/render-lit-html.js';
+
+import './dom-shim.js';
+import {render} from './render-lit-html.js';
 
 export async function renderPath(
   cwd: string,
@@ -64,6 +66,7 @@ export async function renderPath(
             head: String | Iterable<String>;
             shell: String | Iterable<String>;
             page: String | Iterable<String>;
+            err?: any;
           } = {head: '', shell: shellResult, page: ''};
           if (typeof module.render === 'function') {
             result.page = render(module.render());

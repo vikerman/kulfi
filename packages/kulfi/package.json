@@ -14,9 +14,16 @@
   },
   "author": "vikram.subramanian@gmail.com",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
+    "@lit/reactive-element": "1.0.0-pre.2",
     "lit": "^2.0.0-pre.1",
-    "@lit-labs/ssr": "file:../../../schnell/lit-html/packages/lit-ssr"
+    "lit-element": "^3.0.0-pre.3",
+    "lit-html": "^2.0.0-pre.6"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "node-fetch": "^2.6.1",
+    "parse5": "^5.1.0"
   },
   "files": [
     "/index.{js,d.ts}",
@@ -26,7 +33,14 @@
     "README.md"
   ],
   "devDependencies": {
+    "@types/escape-html": "^1.0.0",
+    "@types/node-fetch": "^2.5.8",
+    "@types/parse5": "^5.0.0",
+    "@lit/reactive-element": "1.0.0-pre.2",
+    "lit": "^2.0.0-pre.1",
+    "lit-element": "^3.0.0-pre.3",
+    "lit-html": "^2.0.0-pre.6",
     "rimraf": "^3.0.2",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.3"
   }
 }
