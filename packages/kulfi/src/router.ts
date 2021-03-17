@@ -55,8 +55,27 @@ function replacePage(page: string) {
   while (fragment.body.childNodes.length > 0) {
     newPage.appendChild(document.adoptNode(fragment.body.childNodes.item(0)));
   }
-  pageRoot.firstElementChild?.remove();
+  // TODO: what's the fastest way to clear contents of an element?
+  while (pageRoot.children.length > 0) {
+    pageRoot.firstChild?.remove();
+  }
   pageRoot.appendChild(newPage);
+
+  // Script tags inserted with innerHTML are not loaded.
+  // SUpport only script tags that load JS and not inline JS.
+  // Activate all script tags by reinserting an active clone
+  // (and removing the older one).
+  newPage.querySelectorAll('script').forEach(s => {
+    const newScript = document.createElement('script');
+    if (s.src) {
+      newScript.src = s.src;
+      newScript.type = s.type;
+      newScript.async = true;
+
+      s.parentElement?.insertAdjacentElement('afterend', newScript);
+      s.remove();
+    }
+  });
 }
 
 async function locationUpdated(location: Location) {
@@ -74,6 +93,9 @@ async function locationUpdated(location: Location) {
 
   replaceHead(data.head);
   replacePage(data.page);
+
+  // Convert to ShadowDOM for elements that don't have definition loaded yet.
+  (window as any)['convertShadowRoot']();
 }
 
 // Copied from https://github.com/Polymer/pwa-helpers/blob/master/src/router.ts
