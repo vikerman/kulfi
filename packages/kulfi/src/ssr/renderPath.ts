@@ -1,7 +1,8 @@
+import './dom-shim.js';
+
 import * as fs from 'fs';
 import * as path from 'path';
 
-import './dom-shim.js';
 import {render} from './render-lit-html.js';
 
 export const DECLARATIVE_SHADOW_DOM_POLYFILL = `<script>
@@ -101,3 +102,5 @@ export async function renderPath(
   // 404.
   return {head: '', shell: '<!--PAGE-->', page: '<h2>Page Not Found</h2>', err};
 }
+
+export {render};

@@ -4,7 +4,10 @@ import {Readable} from 'stream';
 import {
   DECLARATIVE_SHADOW_DOM_POLYFILL,
   renderPath,
+  render,
 } from '../ssr/renderPath.js';
+// Should be loaded after renderPath for dom-shim to be loaded.
+import {loadModules} from '../pages/loadModules.js';
 
 const PAGE_PLACEHOLDER = '<!--PAGE-->';
 const PAGE_START = '<div id="__page__"><div>';
@@ -80,8 +83,15 @@ export function ssrPlugin(basePathParam: string) {
           body = body.replace(PAGE_PLACEHOLDER, shell);
         }
         body = body.replace(PAGE_PLACEHOLDER, page);
+
+        // Inject the SSR router.
+        // TODO: Add an option to inject CSR router.
+        const router = Readable.from(
+          render(loadModules('node_modules/kulfi/router.js'))
+        );
+        const routerScript = await toPromise(router);
         return {
-          body: body + DECLARATIVE_SHADOW_DOM_POLYFILL,
+          body: body + routerScript + DECLARATIVE_SHADOW_DOM_POLYFILL,
         };
       }
       return undefined;
