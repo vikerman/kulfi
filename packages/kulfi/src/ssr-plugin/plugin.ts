@@ -80,13 +80,8 @@ export function ssrPlugin(basePathParam: string) {
           body = body.replace(PAGE_PLACEHOLDER, shell);
         }
         body = body.replace(PAGE_PLACEHOLDER, page);
-
-        // Inject the SSR router.
-        // TODO: Add an option to inject CSR router.
-        const routerScript =
-          '<script async type="module" src="node_modules/kulfi/router.js"></script>';
         return {
-          body: body + routerScript + DECLARATIVE_SHADOW_DOM_POLYFILL,
+          body: body + DECLARATIVE_SHADOW_DOM_POLYFILL,
         };
       }
       return undefined;
