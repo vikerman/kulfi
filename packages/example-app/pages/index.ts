@@ -1,7 +1,6 @@
 import {html} from 'lit';
 
 import '../components/example-app.js';
-import {loadModules} from 'kulfi/pages/loadModules.js';
 
 export function head() {
   return html`
@@ -10,10 +9,10 @@ export function head() {
   `;
 }
 
-export function render() {
+export function page() {
   return html`
     <h1>Hello World!!!!</h1>
-    ${loadModules('components/example-app.js')}
+    <script async type="module" src="/js/components/example-app.js"></script>
     <example-app title="Test"></example-app>
   `;
 }

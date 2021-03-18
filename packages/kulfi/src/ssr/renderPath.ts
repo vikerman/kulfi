@@ -34,7 +34,9 @@ export async function renderPath(
     try {
       if (fs.lstatSync(shellPath)?.isFile()) {
         const module = await import(shellPath);
-        shellResult = render(module.render());
+        if (typeof module.page === 'function') {
+          shellResult = render(module.page());
+        }
       }
     } catch (e) {
       // shell module not found.
@@ -83,8 +85,8 @@ export async function renderPath(
             page: String | Iterable<String>;
             err?: any;
           } = {head: '', shell: shellResult, page: ''};
-          if (typeof module.render === 'function') {
-            result.page = render(module.render());
+          if (typeof module.page === 'function') {
+            result.page = render(module.page());
             if (typeof module.head === 'function') {
               result.head = render(module.head());
             }

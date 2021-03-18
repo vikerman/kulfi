@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf pages ssr-plugin *.js *.js.map *.d.ts *.d.ts.map",
+    "clean": "rimraf ssr-plugin *.js *.js.map *.d.ts *.d.ts.map",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "vikram.subramanian@gmail.com",
@@ -26,10 +26,10 @@
     "parse5": "^5.1.0"
   },
   "files": [
-    "/index.{js,d.ts}",
-    "/ssr-plugin/plugin.{js,d.ts}",
-    "/ssr-plugin/renderPath.{js,d.ts}",
-    "/pages/importComponents.{js,d.ts}",
+    "/hydrate-support.*",
+    "/router.*",
+    "/ssr-plugin/*",
+    "/ssr/**/*",
     "README.md"
   ],
   "devDependencies": {

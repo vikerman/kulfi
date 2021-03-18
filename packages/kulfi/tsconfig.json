@@ -10,6 +10,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "declaration": true,
+    "incremental": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": ".",

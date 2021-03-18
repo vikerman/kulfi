@@ -1,6 +1,6 @@
 import {html} from 'lit';
 
-export function render() {
+export function page() {
   return html`<nav>
       <ul>
         <li><a href="/">Home</a></li>
