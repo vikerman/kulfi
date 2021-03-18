@@ -14,7 +14,21 @@
     "sourceMap": true,
     "inlineSources": true,
     "rootDir": "./",
-    "incremental": true
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "ts-lit-plugin",
+        "strict": true,
+        "rules": {
+          "no-unknown-tag-name": "error",
+          "no-unknown-attribute": "error",
+          "no-unknown-property": "error",
+          "no-missing-import": "error",
+          "no-unintended-mixed-binding": "error",
+          "no-property-visibility-mismatch": "error"
+        }
+      }
+    ]
   },
   "include": ["**/*.ts"]
 }
