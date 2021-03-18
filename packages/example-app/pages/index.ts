@@ -4,8 +4,8 @@ import '../components/example-app.js';
 
 export function head() {
   return html`
-    <meta property="og:title" content="Kulfi example app" />
-    <meta property="og:description" content="Home Page" />
+    <meta name="og:title" content="Kulfi example app" />
+    <meta name="og:description" content="Home Page" />
   `;
 }
 
