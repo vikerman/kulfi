@@ -29,16 +29,22 @@ function finalizeStyles(styles?: CSSResultGroup): CSSResultFlatArray {
   return elementStyles;
 }
 
+function isIndex(p: string) {
+  return p === 'index.html' || p === 'index.json';
+}
+
+function isReserved(p: string) {
+  return p === '_shell' || p === '_404';
+}
+
 export async function renderPath(
   cwd: string,
   basePath: string,
   urlPath: string,
   useShell: boolean
 ) {
-  (global as any)['SCRIPT_BASE_PATH'] = basePath;
-
   // Try to render the shell if it exists.
-  const shellPath = path.join(cwd, basePath, '/pages/shell.js');
+  const shellPath = path.join(cwd, basePath, '/pages/_shell.js');
   let shellResult: String | Iterable<String> = '<!--PAGE-->';
   if (useShell) {
     try {
@@ -64,29 +70,61 @@ export async function renderPath(
       continue;
     }
 
-    // Ignore last part of the path if it is explcitly index.html.
-    if (i === parts.length - 1 && (p === 'index.html' || p === 'index.json')) {
+    if (isReserved(p)) {
+      found = false;
       break;
     }
+
+    if (i === parts.length - 1 && isIndex(p)) {
+      break;
+    }
+
+    const isLastSegment =
+      i === parts.length - 1 ||
+      (i === parts.length - 2 && isIndex(parts[parts.length - 1]));
+
     targetPath += `/${p}`;
-    try {
-      if (!fs.lstatSync(targetPath)?.isDirectory()) {
+
+    if (!isLastSegment) {
+      try {
+        if (!fs.lstatSync(targetPath)?.isDirectory()) {
+          found = false;
+          break;
+        }
+      } catch (e) {
         found = false;
         break;
       }
-    } catch (e) {
-      found = false;
+    } else {
+      targetPath += '.js';
+      try {
+        if (!fs.lstatSync(targetPath)?.isFile()) {
+          found = false;
+          break;
+        }
+      } catch (e) {
+        found = false;
+        break;
+      }
+    }
+
+    if (isLastSegment) {
+      // This can happen for second last segment but next segment is just index.html or imdex.json
       break;
     }
   }
 
   let err: Error | undefined;
   if (found) {
+    // This should happen only when route is '/'.
+    if (!targetPath.endsWith('.js')) {
+      targetPath += '/index.js';
+    }
+
     // Try to load the renderer from the index.js file.
-    const indexPath = `${targetPath}/index.js`;
     try {
-      if (fs.lstatSync(indexPath)?.isFile()) {
-        const module = await import(indexPath);
+      if (fs.lstatSync(targetPath)?.isFile()) {
+        const module = await import(targetPath);
         if (module) {
           // render() is a required method for a page. head() and styles are optional.
           const result: {
