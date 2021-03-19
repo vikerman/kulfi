@@ -4,6 +4,8 @@ import {Readable} from 'stream';
 import {DECLARATIVE_SHADOW_DOM_POLYFILL} from '../ssr/decl-shadow-dom.js';
 import {renderModule} from '../ssr/render-module.js';
 
+const SHELL_PLACEHOLDER = '<!--SHELL-->';
+
 const PAGE_PLACEHOLDER = '<!--PAGE-->';
 const PAGE_START = '<div id="__page__"><div>';
 const PAGE_END = '</div></div>';
@@ -73,9 +75,7 @@ export function ssrPlugin(basePathParam: string) {
         const shell = await toPromise(Readable.from(ssrResult.shell));
 
         let body = context.body.replace(HEAD_PLACEHOLDER, head);
-        if (shell !== '<!--PAGE-->') {
-          body = body.replace(PAGE_PLACEHOLDER, shell);
-        }
+        body = body.replace(SHELL_PLACEHOLDER, shell);
         body = body.replace(PAGE_PLACEHOLDER, page);
         return {
           body: body + DECLARATIVE_SHADOW_DOM_POLYFILL,

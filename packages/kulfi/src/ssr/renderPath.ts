@@ -20,8 +20,8 @@ export async function renderPath(
     try {
       if (fs.lstatSync(shellPath)?.isFile()) {
         const module = await import(shellPath);
-        if (typeof module.page === 'function') {
-          shellResult = render(module.page());
+        if (typeof module.shell === 'function') {
+          shellResult = render(module.shell());
         }
       }
     } catch (e) {
