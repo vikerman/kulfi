@@ -1,10 +1,8 @@
 import * as path from 'path';
 import {Readable} from 'stream';
 
-import {
-  DECLARATIVE_SHADOW_DOM_POLYFILL,
-  renderPath,
-} from '../ssr/renderPath.js';
+import {DECLARATIVE_SHADOW_DOM_POLYFILL} from '../ssr/decl-shadow-dom.js';
+import {renderModule} from '../ssr/render-module.js';
 
 const PAGE_PLACEHOLDER = '<!--PAGE-->';
 const PAGE_START = '<div id="__page__"><div>';
@@ -47,13 +45,12 @@ export function ssrPlugin(basePathParam: string) {
     }) {
       if (context.response.is('html')) {
         // Render the path through lit-ssr.
-        const ssrResult = await renderPath(
-          process.cwd(),
-          basePath,
-          context.originalUrl,
-          true
+        const ssrResult = await renderModule(
+          '../ssr/renderPath.js',
+          import.meta.url,
+          'renderPath',
+          [process.cwd(), basePath, context.originalUrl, true]
         );
-
         if (ssrResult.err) {
           // In dev mode return any underlying exception text.
           // Don't do that in prod mode.
@@ -100,11 +97,11 @@ export function ssrPlugin(basePathParam: string) {
       // Client side navigation requests are handled through a special .json handler to
       // return SSR-ed content as JSON responses which can be swapped in by the router.
       if (context.path.endsWith('/index.json')) {
-        const ssrResult = await renderPath(
-          process.cwd(),
-          basePath,
-          context.originalUrl,
-          false
+        const ssrResult = await renderModule(
+          '../ssr/renderPath.js',
+          import.meta.url,
+          'renderPath',
+          [process.cwd(), basePath, context.originalUrl, false]
         );
         const result = {
           head: `<head>${await toPromise(

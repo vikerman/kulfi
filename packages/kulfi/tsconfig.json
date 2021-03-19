@@ -8,6 +8,7 @@
     "strict": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
+    "skipLibCheck": true,
     "importHelpers": true,
     "declaration": true,
     "declarationMap": true,
@@ -15,6 +16,6 @@
     "outDir": ".",
     "rootDir": "./src"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "custom_typings/*.d.ts"],
   "exclude": []
 }

@@ -5,6 +5,8 @@ node_modules/
 *.d.ts
 *.d.ts.map
 
+!/custom_typings/*.d.ts
+
 *.tgz
 *.tsbuildinfo
 .DS_Store

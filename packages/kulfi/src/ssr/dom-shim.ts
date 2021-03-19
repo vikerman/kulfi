@@ -109,10 +109,12 @@ const window = {
   },
   fetch: (url: URL, init: {}) => fetch(url, init),
 
+  // Without VM modules we have to allow async tasks or
+  // other server stuff might break.
   // No-op any async tasks
-  requestAnimationFrame() {},
-  setTimeout() {},
-  clearTimeout() {},
+  // requestAnimationFrame() {},
+  // setTimeout() {},
+  // clearTimeout() {},
 
   // Required for node-fetch
   Buffer,
