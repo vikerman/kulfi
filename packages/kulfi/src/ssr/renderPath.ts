@@ -63,6 +63,7 @@ export async function renderPath(
   const parts = urlPath.split('/');
   let targetPath = path.join(cwd, basePath, '/pages');
   let found = true;
+  const params: Record<string, string> = {};
   for (let i = 0; i < parts.length; i += 1) {
     const p = parts[i];
     if (p === '') {
@@ -89,10 +90,30 @@ export async function renderPath(
       try {
         if (!fs.lstatSync(targetPath)?.isDirectory()) {
           found = false;
-          break;
         }
       } catch (e) {
         found = false;
+      }
+      if (!found) {
+        // Try to check for a parameterized directory.
+        const last = targetPath.lastIndexOf('/');
+        const lastPath = `${targetPath.substring(0, last)}/`;
+        const files = fs.readdirSync(lastPath);
+        for (const f of files) {
+          if (
+            f.startsWith('[') &&
+            f.endsWith(']') &&
+            f.length > 2 &&
+            fs.lstatSync(lastPath + f).isDirectory()
+          ) {
+            targetPath = lastPath + f;
+            params[f.substr(1, f.length - 2)] = p;
+            found = true;
+            break;
+          }
+        }
+      }
+      if (!found) {
         break;
       }
     } else {
@@ -100,10 +121,31 @@ export async function renderPath(
       try {
         if (!fs.lstatSync(targetPath)?.isFile()) {
           found = false;
-          break;
         }
       } catch (e) {
         found = false;
+      }
+      // Try to check for a parameterized file.
+      if (!found) {
+        // Try to check for a parameterized directory.
+        const last = targetPath.lastIndexOf('/');
+        const lastPath = `${targetPath.substring(0, last)}/`;
+        const files = fs.readdirSync(lastPath);
+        for (const f of files) {
+          if (
+            f.startsWith('[') &&
+            f.endsWith('].js') &&
+            f.length > 5 &&
+            fs.lstatSync(lastPath + f).isFile()
+          ) {
+            targetPath = lastPath + f;
+            params[f.substr(1, f.length - 5)] = p;
+            found = true;
+            break;
+          }
+        }
+      }
+      if (!found) {
         break;
       }
     }
@@ -135,10 +177,10 @@ export async function renderPath(
             err?: any;
           } = {head: '', styles: '', shell: shellResult, page: ''};
           if (typeof module.page === 'function') {
-            result.page = render(module.page());
+            result.page = render(module.page(params));
 
             if (typeof module.head === 'function') {
-              result.head = render(module.head());
+              result.head = render(module.head(params));
             }
 
             if (typeof module.styles === 'object') {
