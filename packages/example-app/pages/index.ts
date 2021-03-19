@@ -1,4 +1,4 @@
-import {html} from 'lit';
+import {css, html} from 'lit';
 
 import '../components/example-app.js';
 
@@ -8,6 +8,12 @@ export function head() {
     <meta name="og:description" content="Home Page" />
   `;
 }
+
+export const styles = css`
+  h1 {
+    color: blue;
+  }
+`;
 
 export function page() {
   return html`

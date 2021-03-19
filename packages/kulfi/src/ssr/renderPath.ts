@@ -3,7 +3,31 @@ import './dom-shim.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import {
+  CSSResultGroup,
+  CSSResultFlatArray,
+  CSSResultOrNative,
+  getCompatibleStyle,
+  CSSResult,
+} from '@lit/reactive-element/css-tag.js';
 import {render} from './render-lit-html.js';
+
+function finalizeStyles(styles?: CSSResultGroup): CSSResultFlatArray {
+  const elementStyles = [];
+  if (Array.isArray(styles)) {
+    // Dedupe the flattened array in reverse order to preserve the last items.
+    // TODO(sorvell): casting to Array<unknown> works around TS error that
+    // appears to come from trying to flatten a type CSSResultArray.
+    const set = new Set((styles as Array<unknown>).flat(Infinity).reverse());
+    // Then preserve original order by adding the set items in reverse order.
+    for (const s of set) {
+      elementStyles.unshift(getCompatibleStyle(s as CSSResultOrNative));
+    }
+  } else if (styles !== undefined) {
+    elementStyles.push(getCompatibleStyle(styles));
+  }
+  return elementStyles;
+}
 
 export async function renderPath(
   cwd: string,
@@ -64,18 +88,32 @@ export async function renderPath(
       if (fs.lstatSync(indexPath)?.isFile()) {
         const module = await import(indexPath);
         if (module) {
-          // render() is a required method for a page. head() is optional.
+          // render() is a required method for a page. head() and styles are optional.
           const result: {
             head: String | Iterable<String>;
+            styles: String;
             shell: String | Iterable<String>;
             page: String | Iterable<String>;
             err?: any;
-          } = {head: '', shell: shellResult, page: ''};
+          } = {head: '', styles: '', shell: shellResult, page: ''};
           if (typeof module.page === 'function') {
             result.page = render(module.page());
+
             if (typeof module.head === 'function') {
               result.head = render(module.head());
             }
+
+            if (typeof module.styles === 'object') {
+              const styles = finalizeStyles(module.styles);
+              if (styles.length > 0) {
+                result.styles = '<style>';
+                styles.forEach(s => {
+                  result.styles += (s as CSSResult).cssText;
+                });
+                result.styles += '</style>';
+              }
+            }
+
             return result;
           }
           // else fall through to 404 case.
@@ -88,7 +126,13 @@ export async function renderPath(
     }
   }
   // 404.
-  return {head: '', shell: '<!--PAGE-->', page: '<h2>Page Not Found</h2>', err};
+  return {
+    head: '',
+    styles: '',
+    shell: '<!--PAGE-->',
+    page: '<h2>Page Not Found</h2>',
+    err,
+  };
 }
 
 export {render};

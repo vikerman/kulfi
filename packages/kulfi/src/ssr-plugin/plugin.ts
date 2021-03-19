@@ -67,6 +67,7 @@ export function ssrPlugin(basePathParam: string) {
         const head =
           HEAD_START +
           (await toPromise(Readable.from(ssrResult.head))) +
+          ssrResult.styles +
           HEAD_END;
         const page =
           PAGE_START +
@@ -104,9 +105,10 @@ export function ssrPlugin(basePathParam: string) {
           [process.cwd(), basePath, context.originalUrl, false]
         );
         const result = {
-          head: `<head>${await toPromise(
-            Readable.from(ssrResult.head)
-          )}</head>`,
+          head: `<head>
+            ${await toPromise(Readable.from(ssrResult.head))}
+            ${ssrResult.styles}
+          </head>`,
           page: `<body>${await toPromise(
             Readable.from(ssrResult.page)
           )}</body>`,
