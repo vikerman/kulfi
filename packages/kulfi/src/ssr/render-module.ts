@@ -12,6 +12,8 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
+import {createRequire} from 'module';
+import {getWindow} from './dom-shim.js';
 import {importModule} from './import-module.js';
 
 /**
@@ -29,7 +31,12 @@ export const renderModule = async (
   functionName: string,
   args: unknown[]
 ) => {
-  const module = await importModule(specifier, referrer, global);
+  const window = getWindow({
+    // We need to give window a require to load CJS modules used by the SSR
+    // implementation. If we had only JS module dependencies, we wouldn't need this.
+    require: createRequire(import.meta.url),
+  });
+  const module = await importModule(specifier, referrer, window);
   const f = module.namespace[functionName] as Function;
   // TODO: should we require the result be an AsyncIterable?
   return f(...args);

@@ -177,10 +177,27 @@ export async function renderPath(
             err?: any;
           } = {head: '', styles: '', shell: shellResult, page: ''};
           if (typeof module.page === 'function') {
-            result.page = render(module.page(params));
+            // Fetch the data if data definition exists.
+            let data: any;
+            const dataFile = `${targetPath.substr(
+              0,
+              targetPath.length - 3
+            )}_data.js`;
+            try {
+              if (fs.lstatSync(dataFile)?.isFile()) {
+                const dataModule = await import(dataFile);
+                if (typeof dataModule.data === 'function') {
+                  data = await dataModule.data(params);
+                }
+              }
+            } catch (e) {
+              // Ignore errors
+            }
+
+            result.page = render(module.page(params, data));
 
             if (typeof module.head === 'function') {
-              result.head = render(module.head(params));
+              result.head = render(module.head(params, data));
             }
 
             if (typeof module.styles === 'object') {

@@ -10,6 +10,7 @@
 ### Components
 
 - First line is always `import 'kulfi/hydrate-support.js`
+- Exported function names
 - No async calls
 - Validate params type with file path.
 - Validate data type
