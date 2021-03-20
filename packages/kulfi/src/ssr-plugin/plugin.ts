@@ -53,15 +53,6 @@ export function ssrPlugin(basePathParam: string) {
           'renderPath',
           [process.cwd(), basePath, context.originalUrl, true]
         );
-        if (ssrResult.err) {
-          // In dev mode return any underlying exception text.
-          // Don't do that in prod mode.
-          return {
-            body: `<html><body><pre>${htmlEscape(
-              ssrResult.err.stack
-            )}</pre></body></html>`,
-          };
-        }
 
         // For dev mode just collect the result and return instead of actually streaming.
         const head =
@@ -77,7 +68,19 @@ export function ssrPlugin(basePathParam: string) {
 
         let body = context.body.replace(HEAD_PLACEHOLDER, head);
         body = body.replace(SHELL_PLACEHOLDER, shell);
-        body = body.replace(PAGE_PLACEHOLDER, page);
+
+        if (ssrResult.err) {
+          // In dev mode return any underlying exception text.
+          // Don't do that in prod mode.
+          body = body.replace(
+            PAGE_PLACEHOLDER,
+            `${PAGE_START}<pre>${htmlEscape(
+              ssrResult.err.stack
+            )}</pre>${PAGE_END}`
+          );
+        } else {
+          body = body.replace(PAGE_PLACEHOLDER, page);
+        }
         return {
           body: body + DECLARATIVE_SHADOW_DOM_POLYFILL,
         };
@@ -113,6 +116,13 @@ export function ssrPlugin(basePathParam: string) {
             Readable.from(ssrResult.page)
           )}</body>`,
         };
+
+        if (ssrResult.err) {
+          result.page = `<body><pre>${htmlEscape(
+            ssrResult.err.stack
+          )}</pre></body>`;
+        }
+
         return {body: JSON.stringify(result), type: 'json'};
       }
       return undefined;

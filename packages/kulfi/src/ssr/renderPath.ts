@@ -187,31 +187,37 @@ export async function renderPath(
               if (fs.lstatSync(dataFile)?.isFile()) {
                 const dataModule = await import(dataFile);
                 if (typeof dataModule.data === 'function') {
-                  data = await dataModule.data(params);
+                  try {
+                    data = await dataModule.data(params);
+                  } catch (e) {
+                    err = e;
+                  }
                 }
               }
             } catch (e) {
               // Ignore errors
             }
 
-            result.page = render(module.page(params, data));
+            if (!err) {
+              result.page = render(module.page(params, data));
 
-            if (typeof module.head === 'function') {
-              result.head = render(module.head(params, data));
-            }
-
-            if (typeof module.styles === 'object') {
-              const styles = finalizeStyles(module.styles);
-              if (styles.length > 0) {
-                result.styles = '<style>';
-                styles.forEach(s => {
-                  result.styles += (s as CSSResult).cssText;
-                });
-                result.styles += '</style>';
+              if (typeof module.head === 'function') {
+                result.head = render(module.head(params, data));
               }
-            }
 
-            return result;
+              if (typeof module.styles === 'object') {
+                const styles = finalizeStyles(module.styles);
+                if (styles.length > 0) {
+                  result.styles = '<style>';
+                  styles.forEach(s => {
+                    result.styles += (s as CSSResult).cssText;
+                  });
+                  result.styles += '</style>';
+                }
+              }
+
+              return result;
+            }
           }
           // else fall through to 404 case.
         }
@@ -226,7 +232,7 @@ export async function renderPath(
   return {
     head: '',
     styles: '',
-    shell: '<!--PAGE-->',
+    shell: shellResult,
     page: '<h2>Page Not Found</h2>',
     err,
   };
