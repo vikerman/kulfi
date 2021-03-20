@@ -1,5 +1,3 @@
-import './dom-shim.js';
-
 import * as fs from 'fs';
 import * as path from 'path';
 
