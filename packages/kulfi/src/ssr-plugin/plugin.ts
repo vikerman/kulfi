@@ -91,7 +91,10 @@ export function ssrPlugin(basePathParam: string) {
       // Never cache SSR-ed index.html by having a rolling cache key.
       // This will eventually fill up the LRU cache in the WebDevServer and get discarded.
       // Maybe better to look into a way to not cache this in the first place.
-      if (context.request.url === '/index.html') {
+      if (
+        context.request.url === '/' ||
+        context.request.url === '/index.html'
+      ) {
         cacheKey += 1;
         return cacheKey.toString();
       }
