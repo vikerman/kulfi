@@ -180,7 +180,7 @@ export async function renderPath(
             const dataFile = `${targetPath.substr(
               0,
               targetPath.length - 3
-            )}_data.js`;
+            )}.data.js`;
             try {
               if (fs.lstatSync(dataFile)?.isFile()) {
                 const dataModule = await import(dataFile);
