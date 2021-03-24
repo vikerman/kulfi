@@ -5,7 +5,7 @@ interface ItemData {
   parts: string[];
 }
 
-export function page(params: {id: string}, data: ItemData) {
+export function render(params: {id: string}, data: ItemData) {
   return html`
     <h2>Item ${params.id}</h2>
     <p>Name: ${data.name}</p>

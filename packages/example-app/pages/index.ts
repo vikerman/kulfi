@@ -15,7 +15,7 @@ export const styles = css`
   }
 `;
 
-export function page() {
+export function render() {
   return html`
     <h1>Hello World!!!!</h1>
     <script async type="module" src="/js/components/example-app.js"></script>

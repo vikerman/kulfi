@@ -13,9 +13,6 @@ import {render} from './render-lit-html.js';
 function finalizeStyles(styles?: CSSResultGroup): CSSResultFlatArray {
   const elementStyles = [];
   if (Array.isArray(styles)) {
-    // Dedupe the flattened array in reverse order to preserve the last items.
-    // TODO(sorvell): casting to Array<unknown> works around TS error that
-    // appears to come from trying to flatten a type CSSResultArray.
     const set = new Set((styles as Array<unknown>).flat(Infinity).reverse());
     // Then preserve original order by adding the set items in reverse order.
     for (const s of set) {
@@ -48,8 +45,8 @@ export async function renderPath(
     try {
       if (fs.lstatSync(shellPath)?.isFile()) {
         const module = await import(shellPath);
-        if (typeof module.shell === 'function') {
-          shellResult = render(module.shell());
+        if (typeof module.render === 'function') {
+          shellResult = render(module.render());
         }
       }
     } catch (e) {
@@ -174,7 +171,7 @@ export async function renderPath(
             page: String | Iterable<String>;
             err?: any;
           } = {head: '', styles: '', shell: shellResult, page: ''};
-          if (typeof module.page === 'function') {
+          if (typeof module.render === 'function') {
             // Fetch the data if data definition exists.
             let data: any;
             const dataFile = `${targetPath.substr(
@@ -197,7 +194,7 @@ export async function renderPath(
             }
 
             if (!err) {
-              result.page = render(module.page(params, data));
+              result.page = render(module.render(params, data));
 
               if (typeof module.head === 'function') {
                 result.head = render(module.head(params, data));
