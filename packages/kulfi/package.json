@@ -32,6 +32,7 @@
   },
   "files": [
     "/hydrate-support.*",
+    "/inject.*",
     "/router.*",
     "/ssr-plugin/*",
     "/ssr/**/*",
