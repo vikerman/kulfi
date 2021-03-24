@@ -27,7 +27,6 @@ interface PatchableLitElement extends HTMLElement {
   renderRoot: Element | ShadowRoot;
   render(): unknown;
   _$isFirstUpdate: boolean;
-  _$renderOptions: RenderOptions;
   _$state: ElementState;
   _$initialValues: Map<String | number | Symbol, unknown>;
   _$saveInitialPropertyValues(): void;
@@ -130,7 +129,7 @@ function setupIntersectionObserver(el: PatchableLitElement) {
 
     // Hydrate with initial properties.
     const result = this.render();
-    hydrate(result, this.renderRoot, this._$renderOptions);
+    hydrate(result, this.renderRoot, {host: this});
 
     // Restore current properties.
     if (updated) {
@@ -197,11 +196,7 @@ function setupIntersectionObserver(el: PatchableLitElement) {
         this._$hydrate(/* updated */ true);
       // falls through
       case ElementState.READY:
-        render(
-          this.render(),
-          this.renderRoot as HTMLElement,
-          this._$renderOptions
-        );
+        render(this.render(), this.renderRoot as HTMLElement, {host: this});
         break;
       default:
       // Should never get here.
