@@ -1,4 +1,57 @@
-export const MODULE = 1;
+import {ReactiveController} from '@lit/reactive-element';
+import {provide} from './inject.js';
+
+export interface Router {
+  getController(element: HTMLElement, attr: string): ReactiveController;
+}
+
+class RouterController implements ReactiveController {
+  // eslint-disable-next-line no-useless-constructor
+  constructor(
+    private element: HTMLElement,
+    private attr: string,
+    // eslint-disable-next-line no-use-before-define
+    private router: RouterImpl
+  ) {
+    /* empty */
+  }
+
+  hostDisconnected() {
+    this.router._removeController(this);
+  }
+
+  /** @internal */
+  _update(path: string) {
+    this.element.setAttribute(this.attr, path);
+  }
+}
+
+class RouterImpl implements Router {
+  private readonly controllerList: RouterController[] = [];
+
+  getController(element: HTMLElement, attr: string): ReactiveController {
+    const c = new RouterController(element, attr, this);
+    this.controllerList.push(c);
+    return c;
+  }
+
+  /** @internal */
+  _removeController(r: RouterController) {
+    const i = this.controllerList.indexOf(r);
+    if (i >= 0) {
+      this.controllerList.splice(i, 1);
+    }
+  }
+
+  /** @internal */
+  _update(path: string) {
+    this.controllerList.forEach(c => c._update(path));
+  }
+}
+
+// Create and provide the router instance to the injector.
+const router = new RouterImpl();
+provide('ROUTER', router);
 
 function replaceHead(head: string) {
   const walker = document.createTreeWalker(
@@ -96,6 +149,9 @@ async function locationUpdated(location: Location) {
 
   // Convert to ShadowDOM for elements that don't have definition loaded yet.
   (window as any)['convertShadowRoot']();
+
+  // Update the Router and RouterController
+  router._update(path === '' ? '/' : path);
 }
 
 // Copied from https://github.com/Polymer/pwa-helpers/blob/master/src/router.ts

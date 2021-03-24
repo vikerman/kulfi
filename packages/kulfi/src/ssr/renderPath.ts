@@ -46,7 +46,17 @@ export async function renderPath(
       if (fs.lstatSync(shellPath)?.isFile()) {
         const module = await import(shellPath);
         if (typeof module.render === 'function') {
-          shellResult = render(module.render());
+          let locationPath = urlPath;
+          if (locationPath.endsWith('/index.html')) {
+            locationPath = locationPath.substr(0, locationPath.length - 11);
+          }
+          if (locationPath.endsWith('/')) {
+            locationPath = locationPath.substr(0, locationPath.length - 1);
+          }
+          if (locationPath === '') {
+            locationPath = '/';
+          }
+          shellResult = render(module.render(locationPath));
         }
       }
     } catch (e) {
