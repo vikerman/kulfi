@@ -62,7 +62,7 @@ function replacePage(page: string) {
   pageRoot.appendChild(newPage);
 
   // Script tags inserted with innerHTML are not loaded.
-  // SUpport only script tags that load JS and not inline JS.
+  // Support only script tags that load JS and not inline JS.
   // Activate all script tags by reinserting an active clone
   // (and removing the older one).
   newPage.querySelectorAll('script').forEach(s => {
