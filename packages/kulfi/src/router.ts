@@ -136,6 +136,10 @@ async function locationUpdated(loc: Location) {
   if (path.endsWith('/')) {
     path = path.substring(0, path.length - 1);
   }
+
+  // Update the Router and RouterController
+  _location._update(path === '' ? '/' : path);
+
   const data = await (
     await fetch(new URL(`${path}/index.json`, loc.origin).toString())
   ).json();
@@ -145,9 +149,6 @@ async function locationUpdated(loc: Location) {
 
   // Convert to ShadowDOM for elements that don't have definition loaded yet.
   (window as any)['convertShadowRoot']();
-
-  // Update the Router and RouterController
-  _location._update(path === '' ? '/' : path);
 }
 
 // Copied from https://github.com/Polymer/pwa-helpers/blob/master/src/router.ts

@@ -68,7 +68,7 @@ function setupIntersectionObserver(el: PatchableLitElement) {
         // If IntersectionObserver is not available or polyfilled
         // just hydrate on first update.
         this._$eagerHydration = true;
-      } else {
+      } else if (!this._$eagerHydration) {
         // Setup first level loading based on visibility.
         setupIntersectionObserver(this);
       }
