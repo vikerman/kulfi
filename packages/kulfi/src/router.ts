@@ -1,42 +1,38 @@
-import {ReactiveController} from '@lit/reactive-element';
-import {provide} from './inject.js';
+import {ReactiveController, ReactiveElement} from '@lit/reactive-element';
+import {ControllerProvider, provide} from './bind.js';
 
-export interface Router {
-  getController(element: HTMLElement, attr: string): ReactiveController;
-}
-
-class RouterController implements ReactiveController {
+class LocationController implements ReactiveController {
   // eslint-disable-next-line no-useless-constructor
   constructor(
     private element: HTMLElement,
-    private attr: string,
+    private prop: string,
     // eslint-disable-next-line no-use-before-define
-    private router: RouterImpl
+    private location: LocationImpl
   ) {
     /* empty */
   }
 
   hostDisconnected() {
-    this.router._removeController(this);
+    this.location._removeController(this);
   }
 
   /** @internal */
   _update(path: string) {
-    this.element.setAttribute(this.attr, path);
+    (this.element as any)[this.prop] = path;
   }
 }
 
-class RouterImpl implements Router {
-  private readonly controllerList: RouterController[] = [];
+class LocationImpl implements ControllerProvider {
+  private readonly controllerList: LocationController[] = [];
 
-  getController(element: HTMLElement, attr: string): ReactiveController {
-    const c = new RouterController(element, attr, this);
+  getController(element: ReactiveElement, prop: string): ReactiveController {
+    const c = new LocationController(element, prop, this);
     this.controllerList.push(c);
     return c;
   }
 
   /** @internal */
-  _removeController(r: RouterController) {
+  _removeController(r: LocationController) {
     const i = this.controllerList.indexOf(r);
     if (i >= 0) {
       this.controllerList.splice(i, 1);
@@ -50,8 +46,8 @@ class RouterImpl implements Router {
 }
 
 // Create and provide the router instance to the injector.
-const router = new RouterImpl();
-provide('ROUTER', router);
+const _location = new LocationImpl();
+provide('LOCATION', _location);
 
 function replaceHead(head: string) {
   const walker = document.createTreeWalker(
@@ -131,9 +127,9 @@ function replacePage(page: string) {
   });
 }
 
-async function locationUpdated(location: Location) {
+async function locationUpdated(loc: Location) {
   // Fetch the page data for the new page.
-  let path = location.pathname;
+  let path = loc.pathname;
   if (path.endsWith('/index.html')) {
     path = path.substring(0, path.length - 11);
   }
@@ -141,7 +137,7 @@ async function locationUpdated(location: Location) {
     path = path.substring(0, path.length - 1);
   }
   const data = await (
-    await fetch(new URL(`${path}/index.json`, location.origin).toString())
+    await fetch(new URL(`${path}/index.json`, loc.origin).toString())
   ).json();
 
   replaceHead(data.head);
@@ -151,7 +147,7 @@ async function locationUpdated(location: Location) {
   (window as any)['convertShadowRoot']();
 
   // Update the Router and RouterController
-  router._update(path === '' ? '/' : path);
+  _location._update(path === '' ? '/' : path);
 }
 
 // Copied from https://github.com/Polymer/pwa-helpers/blob/master/src/router.ts
