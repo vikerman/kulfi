@@ -1,7 +1,7 @@
 /* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
 import {PropertyValues, ReactiveElement} from '@lit/reactive-element';
-import {render, RenderOptions} from 'lit-html';
+import {render} from 'lit-html';
 import {hydrate} from 'lit-html/hydrate.js';
 
 // Different Lazy states LazyElement takes before being in
@@ -27,6 +27,7 @@ interface PatchableLitElement extends HTMLElement {
   renderRoot: Element | ShadowRoot;
   render(): unknown;
   _$isFirstUpdate: boolean;
+  _$eagerHydration: boolean;
   _$state: ElementState;
   _$initialValues: Map<String | number | Symbol, unknown>;
   _$saveInitialPropertyValues(): void;
@@ -60,12 +61,13 @@ function setupIntersectionObserver(el: PatchableLitElement) {
   LitElement.prototype._$initialize = function (this: PatchableLitElement) {
     this._$initialValues = new Map();
     this._$isFirstUpdate = true;
+    this._$eagerHydration = this.getAttribute('data-eager') != null;
 
     if (this._$state < ElementState.READY) {
       if (!window.IntersectionObserver) {
         // If IntersectionObserver is not available or polyfilled
-        // Just start getting ready on init.
-        this._$isFirstUpdate = false;
+        // just hydrate on first update.
+        this._$eagerHydration = true;
       } else {
         // Setup first level loading based on visibility.
         setupIntersectionObserver(this);
@@ -183,7 +185,9 @@ function setupIntersectionObserver(el: PatchableLitElement) {
 
     if (this._$state < ElementState.READY && this._$isFirstUpdate) {
       this._$isFirstUpdate = false;
-      return;
+      if (!this._$eagerHydration) {
+        return;
+      }
     }
 
     // We are ready to start doing actual UI updates.
@@ -194,6 +198,10 @@ function setupIntersectionObserver(el: PatchableLitElement) {
       // falls through
       case ElementState.NEEDS_HYDRATION:
         this._$hydrate(/* updated */ true);
+        if (this._$eagerHydration) {
+          this._$eagerHydration = false;
+          return;
+        }
       // falls through
       case ElementState.READY:
         render(this.render(), this.renderRoot as HTMLElement, {host: this});
