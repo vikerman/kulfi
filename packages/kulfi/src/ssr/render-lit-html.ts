@@ -645,7 +645,7 @@ export function* renderTemplateResult(
           if (element instanceof LitElement) {
             instance = new LitElementRenderer(element);
           } else {
-            console.error(`No renderer for custom element: ${op.tagName}`);
+            // console.error(`No renderer for custom element: ${op.tagName}`);
           }
         } catch (e) {
           console.error('Exception in custom element constructor', e);
