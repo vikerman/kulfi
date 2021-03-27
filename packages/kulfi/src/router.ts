@@ -127,7 +127,7 @@ function replacePage(page: string) {
   });
 }
 
-async function locationUpdated(loc: Location) {
+async function locationUpdated(loc: Location, pop: boolean) {
   // Fetch the page data for the new page.
   let path = loc.pathname;
   if (path.endsWith('/index.html')) {
@@ -150,9 +150,10 @@ async function locationUpdated(loc: Location) {
   // Convert to ShadowDOM for elements that don't have definition loaded yet.
   (window as any)['convertShadowRoot']();
 
-  // TODO: Find the right viewport to reset scroll. Also remember the old position
-  // if popping state off of history.
-  window.scrollTo(0, 0);
+  // TODO: Find the right viewport to reset scroll.
+  if (!pop) {
+    window.scrollTo(0, 0);
+  }
 }
 
 // Copied from https://github.com/Polymer/pwa-helpers/blob/master/src/router.ts
@@ -196,8 +197,10 @@ document.body.addEventListener('click', e => {
 
   if (href !== location.href) {
     window.history.pushState({}, '', href);
-    locationUpdated(location);
+    locationUpdated(location, /* pop */ false);
   }
 });
 
-window.addEventListener('popstate', () => locationUpdated(window.location));
+window.addEventListener('popstate', () =>
+  locationUpdated(window.location, /* pop */ true)
+);
