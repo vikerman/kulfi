@@ -154,7 +154,7 @@ function setupIntersectionObserver(el: PatchableLitElement) {
   };
 
   // Capture whether we need hydration or not
-  const {createRenderRoot} = LitElement.prototype;
+  const {createRenderRoot, disconnectedCallback} = LitElement.prototype;
   LitElement.prototype.createRenderRoot = function (this: PatchableLitElement) {
     let renderRoot: Element | ShadowRoot;
     if (this.firstElementChild?.tagName === 'TEMPLATE') {
@@ -172,6 +172,17 @@ function setupIntersectionObserver(el: PatchableLitElement) {
     this._$initialize();
 
     return renderRoot;
+  };
+
+  LitElement.prototype.disconnectedCallback = function (
+    this: PatchableLitElement
+  ) {
+    if (disconnectedCallback) {
+      disconnectedCallback.call(this);
+    }
+    if (observer) {
+      observer.unobserve(this);
+    }
   };
 
   // Hydrate on first update when needed
